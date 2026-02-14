@@ -3,11 +3,12 @@ import { ChevronLeft, CheckCircle, Copy, Share2, Mail, Smartphone, Loader2 } fro
 import axios from 'axios';
 import { QRCodeSVG } from 'qrcode.react';
 import { parseUnits } from 'viem';
-import { useAccount, useWalletClient, useSwitchChain, usePublicClient } from 'wagmi';
 import { Abis } from 'viem/tempo';
+import { useAccount, useWalletClient, useSwitchChain, usePublicClient } from 'wagmi';
+import { toast } from 'react-hot-toast';
+import { authAxios } from '../api';
 import Receipt from './Receipt';
 
-import { toast } from 'react-hot-toast';
 
 interface Invoice {
   tokenAddress: `0x${string}`;
@@ -158,7 +159,7 @@ export default function PaymentPage({ invoiceId, onBack }: { invoiceId: string, 
         setPayStatus('confirmed!');
         toast.success("payment successful!");
         try {
-          const resp = await axios.post(`/api/invoices/${invoiceId}/pay`, {
+          const resp = await authAxios(address).post(`/api/invoices/${invoiceId}/pay`, {
             txHash: hash,
             payerAddress: address,
           });
@@ -222,6 +223,20 @@ export default function PaymentPage({ invoiceId, onBack }: { invoiceId: string, 
                 <span className="status-badge status-pending">pending</span>
                 <h2 style={{ marginTop: '0.75rem', fontSize: '2.5rem', fontWeight: '800' }}>${invoice.amount}</h2>
                 <p style={{ color: 'var(--fg-secondary)', fontSize: '0.95rem' }}>{invoice.memo.toLowerCase() || 'general payment'}</p>
+                {invoice.memo && (
+                  <div style={{ 
+                    background: 'rgba(0, 82, 255, 0.08)', 
+                    border: '1px solid rgba(0, 82, 255, 0.15)', 
+                    borderRadius: '0.6rem', 
+                    padding: '0.6rem 0.8rem', 
+                    marginTop: '0.75rem',
+                    fontSize: '0.85rem',
+                    color: 'var(--fg)',
+                    fontStyle: 'italic'
+                  }}>
+                    📝 "{invoice.memo}"
+                  </div>
+                )}
               </div>
               <div style={{ color: 'var(--fg-secondary)' }}>
                 <CheckCircle size={32} />

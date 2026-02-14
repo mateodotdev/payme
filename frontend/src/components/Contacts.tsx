@@ -1,14 +1,16 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { User, Plus, Trash2, Send, Search, Mail } from 'lucide-react';
+import { User, Plus, Trash2, Send, Search, Mail, Phone } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { isValidAddress, authAxios } from '../api';
 
 interface Contact {
   id: string;
   name: string;
   address: string;
   email?: string;
+  phone?: string;
 }
 
 export default function Contacts({ onSelect }: { onSelect?: (contact: Contact) => void }) {
@@ -17,6 +19,7 @@ export default function Contacts({ onSelect }: { onSelect?: (contact: Contact) =
   const [newName, setNewName] = useState('');
   const [newAddress, setNewAddress] = useState('');
   const [newEmail, setNewEmail] = useState('');
+  const [newPhone, setNewPhone] = useState('');
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
 
@@ -36,18 +39,25 @@ export default function Contacts({ onSelect }: { onSelect?: (contact: Contact) =
 
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault();
-    if (!newName || !newAddress || !walletAddress) return;
+    if (!walletAddress || !newName || !newAddress) return;
+    if (!isValidAddress(newAddress)) {
+      toast.error('invalid wallet address format');
+      return;
+    }
     try {
-      await axios.post('/api/contacts', {
+      const api = authAxios(walletAddress);
+      await api.post('/api/contacts', {
         ownerWallet: walletAddress,
         name: newName,
         walletAddress: newAddress,
         email: newEmail,
+        phone: newPhone,
       });
       await fetchContacts();
       setNewName('');
       setNewAddress('');
       setNewEmail('');
+      setNewPhone('');
       setShowAdd(false);
       toast.success("contact saved!");
     } catch (err) {
@@ -58,7 +68,8 @@ export default function Contacts({ onSelect }: { onSelect?: (contact: Contact) =
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`/api/contacts/${id}`);
+      const api = authAxios(walletAddress);
+      await api.delete(`/api/contacts/${id}`);
       await fetchContacts();
       toast.success("contact removed");
     } catch (err) {
@@ -112,6 +123,15 @@ export default function Contacts({ onSelect }: { onSelect?: (contact: Contact) =
                 placeholder="alice@example.com" 
                 value={newEmail} 
                 onChange={e => setNewEmail(e.target.value)} 
+              />
+            </div>
+            <div className="input-group">
+              <label>phone (optional)</label>
+              <input 
+                type="tel" 
+                placeholder="+1 555-123-4567" 
+                value={newPhone} 
+                onChange={e => setNewPhone(e.target.value)} 
               />
             </div>
             <div className="input-group">
@@ -178,6 +198,11 @@ export default function Contacts({ onSelect }: { onSelect?: (contact: Contact) =
                       {contact.email && (
                         <p style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                           <Mail size={12} /> {contact.email.toLowerCase()}
+                        </p>
+                      )}
+                      {contact.phone && (
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <Phone size={12} /> {contact.phone}
                         </p>
                       )}
                     </div>

@@ -2,14 +2,18 @@ import InvoiceForm from './components/InvoiceForm';
 import PaymentPage from './components/PaymentPage';
 import InvoiceHistory from './components/InvoiceHistory';
 import Contacts from './components/Contacts';
-import { PlusCircle, History, Users } from 'lucide-react';
+import MultiSend from './components/MultiSend';
+import BatchSend from './components/BatchSend';
+import { PlusCircle, History, Users, Send, Layers } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { Toaster } from 'react-hot-toast';
 
+type View = 'create' | 'history' | 'payment' | 'contacts' | 'multi' | 'batch';
+
 function App() {
-  const [view, setView] = useState<'create' | 'history' | 'payment' | 'contacts'>('create');
+  const [view, setView] = useState<View>('create');
   const [activeInvoiceId, setActiveInvoiceId] = useState<string | null>(null);
   const [prefillAddress, setPrefillAddress] = useState<string | null>(null);
   const { address } = useAccount();
@@ -24,7 +28,7 @@ function App() {
     }
   }, []);
 
-  const navigateTo = (newView: 'create' | 'history' | 'payment' | 'contacts', id?: string, prefill?: string) => {
+  const navigateTo = (newView: View, id?: string, prefill?: string) => {
     if (id) setActiveInvoiceId(id);
     if (prefill) setPrefillAddress(prefill);
     setView(newView);
@@ -53,12 +57,24 @@ function App() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-          <nav style={{ display: 'flex', gap: '0.5rem' }}>
+          <nav style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button 
               className={`btn-secondary ${view === 'create' ? 'active' : ''}`}
               onClick={() => navigateTo('create')}
             >
               <PlusCircle size={16} /> send
+            </button>
+            <button 
+              className={`btn-secondary ${view === 'multi' ? 'active' : ''}`}
+              onClick={() => navigateTo('multi')}
+            >
+              <Send size={16} /> multi
+            </button>
+            <button 
+              className={`btn-secondary ${view === 'batch' ? 'active' : ''}`}
+              onClick={() => navigateTo('batch')}
+            >
+              <Layers size={16} /> batch
             </button>
             <button 
               className={`btn-secondary ${view === 'contacts' ? 'active' : ''}`}
@@ -94,6 +110,8 @@ function App() {
         )}
         {view === 'history' && <InvoiceHistory onSelect={(id) => navigateTo('payment', id)} />}
         {view === 'contacts' && <Contacts onSelect={(contact) => navigateTo('create', undefined, contact.address)} />}
+        {view === 'multi' && <MultiSend />}
+        {view === 'batch' && <BatchSend />}
         {view === 'payment' && activeInvoiceId && (
           <PaymentPage invoiceId={activeInvoiceId} onBack={() => navigateTo('history')} />
         )}

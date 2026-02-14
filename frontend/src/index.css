@@ -97,6 +97,30 @@ select {
   cursor: pointer;
 }
 
+textarea {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  color: var(--fg);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  line-height: 1.5;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.15);
+}
+
+textarea::placeholder {
+  color: var(--fg-secondary);
+  opacity: 0.5;
+}
+
 select:hover {
   border-color: var(--border-hover);
   background-color: var(--bg-elevated);
@@ -280,5 +304,44 @@ input::placeholder {
 @media (max-width: 768px) {
   .container { padding: 1.5rem 1rem; }
   h1 { font-size: 1.5rem; }
-  .header-main { flex-direction: column; align-items: flex-start !important; }
+  h2 { font-size: 1.15rem; }
+  .header-main { flex-direction: column; align-items: flex-start !important; gap: 1rem !important; }
+
+  /* Nav tabs: horizontal scroll on mobile */
+  .header-main nav {
+    display: flex;
+    gap: 0.35rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    width: 100%;
+    padding-bottom: 0.25rem;
+  }
+  .header-main nav::-webkit-scrollbar { display: none; }
+  .header-main nav .btn-secondary {
+    white-space: nowrap;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.65rem;
+    flex-shrink: 0;
+  }
+
+  /* Cards tighter on mobile */
+  .glass-card { padding: 1rem; }
+
+  /* Multi-send / batch row inputs stack */
+  .glass-card div[style*="flex-wrap: wrap"] {
+    flex-direction: column;
+  }
+  .glass-card input[style*="flex: 2"],
+  .glass-card input[style*="flex: 1"] {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 1rem 0.75rem; }
+  h2 { font-size: 1rem; }
+  .btn-primary { font-size: 0.85rem; padding: 0.65rem 1rem; }
+  .btn-secondary { font-size: 0.75rem; padding: 0.45rem 0.6rem; }
 }

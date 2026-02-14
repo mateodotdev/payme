@@ -53,7 +53,8 @@ def init_db():
                 payer_address TEXT DEFAULT '',
                 tempo_chain_id TEXT,
                 tempo_rpc TEXT,
-                stablecoin_name TEXT DEFAULT 'USD Stablecoin'
+                stablecoin_name TEXT DEFAULT 'USD Stablecoin',
+                fee_sponsored TEXT DEFAULT 'false'
             )
         """)
         cursor.execute("""
@@ -62,10 +63,26 @@ def init_db():
                 owner_wallet TEXT NOT NULL,
                 name TEXT NOT NULL,
                 wallet_address TEXT NOT NULL,
-                email TEXT DEFAULT ''
+                email TEXT DEFAULT '',
+                phone TEXT DEFAULT ''
             )
         """)
         conn.commit()
+
+        # ── migrations for existing databases ──
+        migrations = [
+            "ALTER TABLE contacts ADD COLUMN phone TEXT DEFAULT ''",
+            "ALTER TABLE invoices ADD COLUMN fee_sponsored TEXT DEFAULT 'false'",
+        ]
+        for sql in migrations:
+            try:
+                cursor.execute(sql)
+                conn.commit()
+            except Exception:
+                # Column already exists — ignore
+                if DATABASE_URL:
+                    conn.rollback()
+
     print("database initialized")
 
 
@@ -97,4 +114,5 @@ def row_to_dict(row) -> dict:
         "tempoChainId": r.get("tempo_chain_id"),
         "tempoRpc": r.get("tempo_rpc"),
         "stablecoinName": r.get("stablecoin_name"),
+        "feeSponsored": r.get("fee_sponsored", "false") == "true",
     }

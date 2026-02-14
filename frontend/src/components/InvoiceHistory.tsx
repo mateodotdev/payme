@@ -3,6 +3,7 @@ import { FileText, Clock, ChevronRight, Trash2, Search } from 'lucide-react';
 import axios from 'axios';
 import { useAccount } from 'wagmi';
 import { toast } from 'react-hot-toast';
+import { authAxios } from '../api';
 
 interface Invoice {
   id: string;
@@ -39,7 +40,7 @@ const InvoiceHistory: React.FC<InvoiceHistoryProps> = ({ onSelect }) => {
     e.stopPropagation();
     if (!window.confirm("are you sure you want to delete this invoice record?")) return;
     try {
-      await axios.delete(`/api/invoices/${id}`);
+      await authAxios(address).delete(`/api/invoices/${id}`);
       setInvoices(prev => prev.filter(inv => inv.id !== id));
       toast.success("record removed from history");
     } catch (err) {

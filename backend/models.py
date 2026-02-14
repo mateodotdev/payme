@@ -20,3 +20,4 @@ class CreateContactRequest(BaseModel):
     name: str
     walletAddress: str
     email: Optional[str] = ""
+    phone: Optional[str] = ""

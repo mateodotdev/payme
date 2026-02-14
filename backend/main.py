@@ -6,6 +6,7 @@ import uvicorn
 from config import PORT, FRONTEND_BASE_URL
 from database import init_db
 from routes import router
+from middleware import RateLimitMiddleware, WalletAuthMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,6 +30,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Rate limiting: 60 requests per minute per IP
+app.add_middleware(RateLimitMiddleware, max_requests=60, window_seconds=60)
+
+# Wallet auth: require X-Wallet-Address on mutating requests
+app.add_middleware(WalletAuthMiddleware)
 
 app.include_router(router)
 
