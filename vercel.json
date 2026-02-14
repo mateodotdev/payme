@@ -11,9 +11,7 @@
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist",
-        "installCommand": "npm install --legacy-peer-deps",
-        "buildCommand": "npm run build"
+        "distDir": "dist"
       }
     }
   ],
@@ -23,7 +21,7 @@
       "destination": "/backend/api/index.py"
     },
     {
-      "source": "/((?!api|_next|assets|favicon|logo).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
