@@ -73,7 +73,7 @@ const InvoiceHistory: React.FC<InvoiceHistoryProps> = ({ onSelect }) => {
       </div>
 
       {invoices.length === 0 ? (
-        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>No invoices found.</p>
+        <p style={{ textAlign: 'center', color: 'var(--fg-secondary)', padding: '2rem' }}>No invoices found.</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {filteredInvoices.map((inv) => (
@@ -96,7 +96,7 @@ const InvoiceHistory: React.FC<InvoiceHistoryProps> = ({ onSelect }) => {
                 </div>
                 <div>
                   <h4 style={{ margin: 0 }}>{inv.memo || 'Unlabeled'}</h4>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0.2rem 0 0 0' }}>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)', margin: '0.2rem 0 0 0' }}>
                     <Clock size={12} /> {new Date(inv.createdAt).toLocaleDateString()}
                   </p>
                 </div>

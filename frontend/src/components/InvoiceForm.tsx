@@ -33,9 +33,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onCreated, prefillAddress }) 
     const fetchContacts = async () => {
       try {
         const resp = await axios.get(`/api/contacts?wallet=${address}`);
-        setContacts(resp.data || []);
+        setContacts((resp.data || []).map((c: any) => ({ name: c.name, address: c.address })));
       } catch (err) {
         console.error(err);
+        // Silently fail - contacts are optional
       }
     };
     fetchContacts();

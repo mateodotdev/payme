@@ -41,8 +41,13 @@ export default function PaymentPage({ invoiceId, onBack }: { invoiceId: string, 
       try {
         const resp = await axios.get(`/api/invoices/${invoiceId}`);
         setInvoice(resp.data);
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
+        if (err.response?.status === 404) {
+          toast.error('Invoice not found');
+        } else {
+          toast.error('Failed to load invoice');
+        }
       }
     };
 

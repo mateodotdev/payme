@@ -40,7 +40,7 @@ function App() {
       <Toaster 
         position="top-right" 
         toastOptions={{ 
-          style: { background: 'var(--card-bg)', color: 'var(--fg-primary)', border: '1px solid var(--border)' } 
+          style: { background: 'var(--bg-card)', color: 'var(--fg)', border: '1px solid var(--border)' } 
         }} 
       />
       <header className="header-main" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>

@@ -133,19 +133,19 @@ export default function Contacts({ onSelect }: { onSelect?: (contact: Contact) =
       )}
 
       <div className="glass-card" style={{ padding: '0' }}>
-        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Search size={18} color="var(--text-secondary)" />
+        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Search size={18} color="var(--fg-secondary)" />
           <input 
             type="text" 
             placeholder="search by name, email or address..." 
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ border: 'none', padding: '0.5rem', fontSize: '0.9rem', background: 'transparent', color: 'var(--text-primary)', width: '100%' }}
+            style={{ border: 'none', padding: '0.5rem', fontSize: '0.9rem', background: 'transparent', color: 'var(--fg)', width: '100%' }}
           />
         </div>
 
         {filtered.length === 0 ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--fg-secondary)' }}>
             {contacts.length === 0 ? 'your address book is empty.' : 'no contacts match your search.'}
           </div>
         ) : (
@@ -158,7 +158,7 @@ export default function Contacts({ onSelect }: { onSelect?: (contact: Contact) =
                   justifyContent: 'space-between', 
                   alignItems: 'center', 
                   padding: '1.25rem 1.5rem',
-                  borderBottom: index === filtered.length - 1 ? 'none' : '1px solid var(--border-color)',
+                  borderBottom: index === filtered.length - 1 ? 'none' : '1px solid var(--border)',
                   transition: 'background 0.2s ease',
                   cursor: onSelect ? 'pointer' : 'default'
                 }}
@@ -166,17 +166,17 @@ export default function Contacts({ onSelect }: { onSelect?: (contact: Contact) =
                 onClick={() => onSelect?.(contact)}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ background: 'var(--text-primary)', color: 'var(--bg-color)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                  <div style={{ background: 'var(--fg)', color: 'var(--bg)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
                     {contact.name[0].toLowerCase()}
                   </div>
                   <div>
                     <h4 style={{ fontWeight: '600' }}>{contact.name.toLowerCase()}</h4>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.25rem' }}>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)', fontFamily: 'monospace' }}>
                         {contact.address.slice(0, 6)}...{contact.address.slice(-4)}
                       </p>
                       {contact.email && (
-                        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--fg-secondary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                           <Mail size={12} /> {contact.email.toLowerCase()}
                         </p>
                       )}
