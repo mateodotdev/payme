@@ -1,23 +1,25 @@
+import sys
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+
+# Add the current directory to sys.path to allow importing siblings
+sys.path.insert(0, os.path.dirname(__file__))
 
 from config import PORT, FRONTEND_BASE_URL
 from database import init_db
 from routes import router
 from middleware import RateLimitMiddleware, WalletAuthMiddleware
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # initialize database on startup
-    try:
-        init_db()
-    except Exception as e:
-        print(f"CRITICAL: Failed to initialize database: {e}")
-    yield
+# Initialize database globally to ensure it runs immediately on cold starts
+try:
+    init_db()
+except Exception as e:
+    print(f"CRITICAL: Failed to initialize database: {e}")
 
-app = FastAPI(title="payme", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="payme", version="1.0.0")
 
 # Handle CORS via standard middleware below
 
@@ -62,4 +64,4 @@ def health():
 
 if __name__ == "__main__":
     print(f"server listening on :{PORT}")
-    uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=True)
+    uvicorn.run("index:app", host="0.0.0.0", port=PORT, reload=True)

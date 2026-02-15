@@ -15,8 +15,10 @@ def get_db():
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql://", 1)
             
+        print(f"DEBUG: Attempting to connect to PostgreSQL (url present: {bool(url)})")
         try:
             conn = psycopg2.connect(url, connect_timeout=10)
+            print("DEBUG: Connection successful")
             yield conn
         except Exception as e:
             print(f"ERROR: Could not connect to PostgreSQL: {e}")
