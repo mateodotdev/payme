@@ -266,3 +266,13 @@ nav.nav-tabs .btn-nav.active {
   padding: 0 0.75rem !important;
   height: 36px !important;
 }
+
+/* Nuke all RainbowKit balance displays (Button & Modal) */
+[data-testid="rk-balance-text"],
+[data-testid="rk-account-modal-balance"],
+button > div:has(> span:contains("pathusd")),
+button > div:has(> span:contains("PATHUSD")),
+div[class*="rk-balance"],
+div[class*="BalanceContainer"] {
+  display: none !important;
+}

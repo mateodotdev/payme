@@ -37,6 +37,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onCreated, prefillAddress }) 
   const [tokenAddress, setTokenAddress] = useState(TOKEN_ADDRESS as string);
 
   useEffect(() => {
+    console.log("--- INVOICEFORM.tsx LOADED (v2.1-FORCE-CORS) ---");
     if (prefillAddress) {
       setRecipientAddress(prefillAddress);
       setAppMode('send');

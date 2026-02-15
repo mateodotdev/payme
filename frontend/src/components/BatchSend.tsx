@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Loader2, CheckCircle, XCircle, Layers } from 'lucide-react';
-import { useAccount, useWalletClient, useSwitchChain, usePublicClient } from 'wagmi';
+import { useAccount, useWriteContract, useSwitchChain, usePublicClient } from 'wagmi';
 import { parseUnits, encodeFunctionData } from 'viem';
 import { Abis } from 'viem/tempo';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { isValidAddress } from '../api';
+import { switchChain } from 'viem/actions';
 
 interface Recipient {
   id: string;
@@ -36,9 +37,9 @@ const multicallAbi = [
 
 export default function BatchSend() {
   const { address, isConnected } = useAccount();
-  const { data: walletClient } = useWalletClient();
-  const { switchChain } = useSwitchChain();
+  const { switchChainAsync } = useSwitchChain();
   const publicClient = usePublicClient();
+  const { writeContractAsync } = useWriteContract();
 
   const [sending, setSending] = useState(false);
   const [batchStatus, setBatchStatus] = useState<'idle' | 'pending' | 'confirmed' | 'failed'>('idle');
@@ -99,7 +100,7 @@ export default function BatchSend() {
     const results = await Promise.allSettled(
       validRecipients.map(async (r) => {
         const amountWei = parseUnits(r.amount, decimals);
-        const hash = await walletClient!.writeContract({
+        const hash = await writeContractAsync({
           address: TOKEN_ADDRESS,
           abi: Abis.tip20,
           functionName: 'transfer',
@@ -126,7 +127,7 @@ export default function BatchSend() {
   };
 
   const handleBatchSend = async () => {
-    if (!isConnected || !walletClient || !address || !publicClient) {
+    if (!isConnected || !address || !publicClient) {
       toast.error('connect your wallet first');
       return;
     }
@@ -146,11 +147,11 @@ export default function BatchSend() {
 
     setSending(true);
     setBatchStatus('pending');
-    setTxHash('');
+      setTxHash('');
     setFallbackMode(false);
 
     try {
-      await switchChain({ chainId: 42431 });
+      await switchChainAsync({ chainId: 42431 });
     } catch { /* may already be on chain */ }
 
     // Fetch decimals
@@ -222,7 +223,7 @@ export default function BatchSend() {
         }),
       }));
 
-      const hash = await walletClient.writeContract({
+      const hash = await writeContractAsync({
         address: MULTICALL3_ADDRESS,
         abi: multicallAbi,
         functionName: 'aggregate3',
@@ -263,7 +264,7 @@ export default function BatchSend() {
           <Layers size={24} /> batch send
         </h2>
         <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>
-          {recipients.filter(r => r.address && r.amount).length} recipient{recipients.filter(r => r.address && r.amount).length !== 1 ? 's' : ''} · ${totalAmount.toFixed(2)}
+          {recipients.filter(r => r.address && r.amount).length} recipient{recipients.filter(r => r.address && r.amount).length !== 1 ? 's' : ''} · ${totalAmount > 1e9 ? 'very large' : totalAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
         </span>
       </div>
 

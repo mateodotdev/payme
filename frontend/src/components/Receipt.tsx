@@ -58,7 +58,7 @@ export default function Receipt({ invoice }: ReceiptProps) {
             </div>
             <div class="receipt-body">
               <div class="amount">
-                <h2>$${invoice.amount}</h2>
+                <h2>$${parseFloat(invoice.amount).toLocaleString(undefined, { maximumFractionDigits: 2 })}</h2>
                 <div class="status">✓ paid</div>
               </div>
               <div class="row"><span class="label">reference</span><span class="value">${invoice.memo || 'n/a'}</span></div>
@@ -101,7 +101,9 @@ export default function Receipt({ invoice }: ReceiptProps) {
 
         {/* amount */}
         <div style={{ textAlign: 'center', padding: '2rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.03em' }}>${invoice.amount}</h2>
+          <h2 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.03em' }}>
+            ${parseFloat(invoice.amount).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+          </h2>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem' }}>
             <CheckCircle size={14} color="var(--success)" />
             <span className="status-badge status-paid">paid</span>

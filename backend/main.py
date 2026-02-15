@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
@@ -18,6 +18,19 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="payme", version="1.0.0", lifespan=lifespan)
+
+@app.middleware("http")
+async def add_cors_header(request: Request, call_next):
+    if request.method == "OPTIONS":
+        response = Response()
+    else:
+        response = await call_next(request)
+    
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
 
 # Restrict CORS for security
 origins = [
@@ -40,7 +53,7 @@ app.add_middleware(RateLimitMiddleware, max_requests=60, window_seconds=60)
 # Wallet auth: require X-Wallet-Address on mutating requests
 app.add_middleware(WalletAuthMiddleware)
 
-app.include_router(router)
+app.include_router(router, prefix="/api")
 
 
 @app.get("/")
@@ -48,7 +61,8 @@ def root():
     return {
         "status": "running",
         "service": "payme-backend",
-        "message": "connect to /health for status"
+        "version": "v2.1-FORCE-CORS",
+        "message": "CORS should now be fully open (*)"
     }
 
 

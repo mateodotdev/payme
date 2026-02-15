@@ -104,7 +104,9 @@ const InvoiceHistory: React.FC<InvoiceHistoryProps> = ({ onSelect }) => {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontWeight: 'bold', margin: 0 }}>${inv.amount}</p>
+                  <p style={{ fontWeight: 'bold', margin: 0 }}>
+                    ${parseFloat(inv.amount.toString()).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  </p>
                   <span className={`status-badge ${inv.status === 'PAID' ? 'status-paid' : 'status-pending'}`}>
                     {inv.status.toLowerCase()}
                   </span>

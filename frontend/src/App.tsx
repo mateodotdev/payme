@@ -8,6 +8,7 @@ import { PlusCircle, History, Users, Send, Layers } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { Toaster } from 'react-hot-toast';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 type View = 'create' | 'history' | 'payment' | 'contacts' | 'multi' | 'batch';
 
@@ -20,7 +21,7 @@ function App() {
 
   useEffect(() => {
     // Sanity check for environment variables in development/production
-    console.log("--- PAYME APP LOADED (v2.0-DEPLOYMENT-FIX) ---");
+    console.log("--- PAYME APP LOADED (v2.2-RAINBOW-REVERT) ---");
     console.log(`[system] api base url: ${import.meta.env.VITE_API_URL || '/api'}`);
   }, []);
 
@@ -95,7 +96,7 @@ function App() {
             </button>
           </nav>
           
-          <appkit-button />
+          <ConnectButton showBalance={false} chainStatus="none" />
         </div>
       </header>
 

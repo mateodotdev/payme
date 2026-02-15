@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Send, Loader2, CheckCircle, XCircle, Users } from 'lucide-react';
-import { useAccount, useWalletClient, useSwitchChain, usePublicClient } from 'wagmi';
+import { useAccount, useWriteContract, useSwitchChain, usePublicClient } from 'wagmi';
 import { parseUnits } from 'viem';
 import { Abis } from 'viem/tempo';
 import axios from 'axios';
@@ -21,9 +21,9 @@ const TOKEN_ADDRESS = '0x20c0000000000000000000000000000000000000' as `0x${strin
 
 export default function MultiSend() {
   const { address, isConnected } = useAccount();
-  const { data: walletClient } = useWalletClient();
-  const { switchChain } = useSwitchChain();
+  const { switchChainAsync } = useSwitchChain();
   const publicClient = usePublicClient();
+  const { writeContractAsync } = useWriteContract();
 
   const [sending, setSending] = useState(false);
   const [contacts, setContacts] = useState<{name: string, address: string}[]>([]);
@@ -54,7 +54,7 @@ export default function MultiSend() {
   const totalAmount = recipients.reduce((acc, r) => acc + (parseFloat(r.amount) || 0), 0);
 
   const handleSendAll = async () => {
-    if (!isConnected || !walletClient || !address || !publicClient) {
+    if (!isConnected || !address || !publicClient) {
       toast.error('connect your wallet first');
       return;
     }
@@ -75,7 +75,7 @@ export default function MultiSend() {
     setSending(true);
 
     try {
-      await switchChain({ chainId: 42431 });
+      await switchChainAsync({ chainId: 42431 });
     } catch { /* may already be on chain */ }
 
     // fetch decimals once
@@ -102,7 +102,7 @@ export default function MultiSend() {
       valid.map(async (recipient) => {
         const amountWei = parseUnits(recipient.amount, decimals);
 
-        const hash = await walletClient.writeContract({
+        const hash = await writeContractAsync({
           address: TOKEN_ADDRESS,
           abi: Abis.tip20,
           functionName: 'transfer',
@@ -157,7 +157,7 @@ export default function MultiSend() {
           <Send size={24} /> multi-send
         </h2>
         <span style={{ fontSize: '0.85rem', color: 'var(--fg-secondary)' }}>
-          {recipients.filter(r => r.address && r.amount).length} recipient{recipients.filter(r => r.address && r.amount).length !== 1 ? 's' : ''} · ${totalAmount.toFixed(2)}
+          {recipients.filter(r => r.address && r.amount).length} recipient{recipients.filter(r => r.address && r.amount).length !== 1 ? 's' : ''} · ${totalAmount > 1e9 ? 'very large' : totalAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
         </span>
       </div>
 

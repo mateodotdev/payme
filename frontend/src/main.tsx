@@ -1,19 +1,17 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { WagmiProvider } from "wagmi";
+import { RainbowKitProvider, getDefaultConfig, darkTheme } from "@rainbow-me/rainbowkit";
+import { WagmiProvider, http } from "wagmi";
+import { mainnet } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createAppKit } from '@reown/appkit/react';
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import { mainnet, arbitrum } from '@reown/appkit/networks';
+import "@rainbow-me/rainbowkit/styles.css";
 import "./index.css";
 import App from "./App.tsx";
 
-// 1. Get projectId from https://cloud.reown.com
 const projectId = '13341d916db3579c966fe7d6852649be';
 
 const tempoChain = {
   id: 42431,
-  chainNamespace: 'eip155',
   name: "Tempo Testnet",
   nativeCurrency: { name: "pathUSD", symbol: "pathUSD", decimals: 18 },
   rpcUrls: {
@@ -22,41 +20,39 @@ const tempoChain = {
   blockExplorers: {
     default: { name: "Tempo Explorer", url: "https://explore.tempo.xyz" },
   },
+  testnet: true,
 } as const;
 
-const networks = [tempoChain, mainnet, arbitrum] as any;
-
-// 3. Create Wagmi Adapter
-const wagmiAdapter = new WagmiAdapter({
+const config = getDefaultConfig({
+  appName: "payme",
   projectId,
-  networks
-});
-
-// 4. Create AppKit
-createAppKit({
-  adapters: [wagmiAdapter],
-  networks,
-  projectId,
-  metadata: {
-    name: 'payme',
-    description: 'send money on tempo',
-    url: typeof window !== 'undefined' ? window.location.origin : 'https://payme-tempo.vercel.app',
-    icons: [] // Removing non-existent icon to avoid loading issues
+  chains: [tempoChain],
+  transports: {
+    [tempoChain.id]: http(),
   },
-  themeMode: 'dark',
-  themeVariables: {
-    '--w3m-accent': '#0052ff',
-    '--w3m-border-radius-master': '1px'
-  }
+  ssr: true,
 });
+
+// No AppKit config needed here
 
 const queryClient = new QueryClient();
+console.log("--- MAIN.tsx LOADED (v2.2-RAINBOW-REVERT) ---");
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
+    <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <RainbowKitProvider 
+          theme={darkTheme({
+            accentColor: '#0052ff',
+            accentColorForeground: 'white',
+            borderRadius: 'medium', // Matches 16px radius
+            overlayBlur: 'small',
+          })}
+          coolMode
+        >
+          <App />
+        </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   </StrictMode>

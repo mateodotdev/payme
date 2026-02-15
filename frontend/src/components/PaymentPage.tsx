@@ -4,7 +4,7 @@ import { ChevronLeft, CheckCircle, Copy, Share2, Mail, Smartphone, Loader2 } fro
 import { QRCodeSVG } from 'qrcode.react';
 import { parseUnits } from 'viem';
 import { Abis } from 'viem/tempo';
-import { useAccount, useWalletClient, useSwitchChain, usePublicClient } from 'wagmi';
+import { useAccount, useWriteContract, useSwitchChain, usePublicClient } from 'wagmi';
 import { toast } from 'react-hot-toast';
 import { authAxios, baseApi } from '../api';
 import Receipt from './Receipt';
@@ -33,9 +33,9 @@ export default function PaymentPage({ invoiceId, onBack }: { invoiceId: string, 
   const [txHash, setTxHash] = useState<string | null>(null);
 
   const { address, isConnected } = useAccount();
-  const { data: walletClient } = useWalletClient();
-  const { switchChain } = useSwitchChain();
+  const { switchChainAsync } = useSwitchChain();
   const publicClient = usePublicClient();
+  const { writeContractAsync } = useWriteContract();
 
   useEffect(() => {
     const fetchInvoice = async () => {
@@ -83,7 +83,7 @@ export default function PaymentPage({ invoiceId, onBack }: { invoiceId: string, 
   };
 
   const handlePayWithWallet = async () => {
-    if (!isConnected || !walletClient || !address || !publicClient) {
+    if (!isConnected || !address || !publicClient) {
       toast.error('please connect your wallet first.');
       return;
     }
@@ -92,7 +92,7 @@ export default function PaymentPage({ invoiceId, onBack }: { invoiceId: string, 
     setPayStatus('checking balance...');
     try {
       try {
-        await switchChain({ chainId: 42431 });
+        await switchChainAsync({ chainId: 42431 });
       } catch {
         // user may have rejected or chain already active
       }
@@ -121,29 +121,9 @@ export default function PaymentPage({ invoiceId, onBack }: { invoiceId: string, 
         return;
       }
 
-      setPayStatus('simulating transaction...');
-      try {
-        await publicClient.simulateContract({
-          account: address,
-          address: invoice.tokenAddress,
-          abi: Abis.tip20,
-          functionName: 'transfer',
-          args: [invoice.merchantAddress as `0x${string}`, amountWei],
-        });
-      } catch (simErr: any) {
-        setPaying(false);
-        setPayStatus('');
-        console.error('simulation failed:', simErr);
-        // show a more detailed toast or alert
-        const reason = simErr.shortMessage || simErr.message || 'unknown error';
-        toast.error(`transaction would revert: ${reason}`, { duration: 6000 });
-        return;
-      }
-
       setPayStatus('sending transaction...');
 
-      // use walletClient.writeContract with the official TIP-20 ABI from viem/tempo
-      const hash = await walletClient.writeContract({
+      const hash = await writeContractAsync({
         address: invoice.tokenAddress,
         abi: Abis.tip20,
         functionName: 'transfer',
@@ -221,7 +201,9 @@ export default function PaymentPage({ invoiceId, onBack }: { invoiceId: string, 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
               <div>
                 <span className="status-badge status-pending">pending</span>
-                <h2 style={{ marginTop: '0.75rem', fontSize: '2.5rem', fontWeight: '800' }}>${invoice.amount}</h2>
+                <h2 style={{ marginTop: '0.75rem', fontSize: '2.5rem', fontWeight: '800' }}>
+                  ${parseFloat(invoice.amount).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </h2>
                 <p style={{ color: 'var(--fg-secondary)', fontSize: '0.95rem' }}>{invoice.memo.toLowerCase() || 'general payment'}</p>
                 {invoice.memo && (
                   <div style={{ 
