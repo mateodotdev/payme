@@ -11,16 +11,10 @@ export default defineConfig({
     setupFiles: './src/test/setup.ts',
   },
   build: {
-    chunkSizeWarningLimit: 2000, // Increased to 2MB to handle large Web3 bundles
+    chunkSizeWarningLimit: 3000, 
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('@reown')) return 'vendor-reown';
-            if (id.includes('wagmi') || id.includes('viem') || id.includes('@tanstack')) return 'vendor-web3';
-            return 'vendor-base';
-          }
-        },
+        // Removed manualChunks to avoid circular dependency crashes in production
       },
     },
   },
