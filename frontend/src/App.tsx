@@ -6,7 +6,7 @@ import MultiSend from './components/MultiSend';
 import BatchSend from './components/BatchSend';
 import { PlusCircle, History, Users, Send, Layers } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useConnect } from 'wagmi';
 import { Toaster } from 'react-hot-toast';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 
@@ -19,11 +19,23 @@ function App() {
   const { address } = useAccount();
   void address; // used by ConnectButton internally
 
+  // For debugging wallet connection events
+  const { connect, connectors, isSuccess, isError } = useConnect();
+
   useEffect(() => {
     // Sanity check for environment variables in development/production
-    console.log("--- PAYME APP LOADED (v2.2-RAINBOW-REVERT) ---");
+    console.log("--- PAYME APP LOADED (v2.2-RAINBOW-REVERT, ssr:false) ---");
     console.log(`[system] api base url: ${import.meta.env.VITE_API_URL || '/api'}`);
   }, []);
+
+  useEffect(() => {
+    if (isSuccess) {
+      console.log("Wallet successfully connected!");
+    }
+    if (isError) {
+      console.error("Wallet connection error");
+    }
+  }, [isSuccess, isError]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -44,6 +56,15 @@ function App() {
        window.history.pushState({}, '', `?invoiceId=${id}`);
     }
   };
+
+  // Optional: Custom wallet selection buttons for debugging (can remove later)
+  const handleWalletClick = (connector: any) => {
+    console.log(`Attempting to connect to wallet: ${connector.name}`);
+    connect({ connector });
+  };
+
+  // Mobile warning for custom chain support
+  const showMobileWarning = typeof window !== "undefined" && window.innerWidth < 720;
 
   return (
     <div className="container">
@@ -96,7 +117,27 @@ function App() {
             </button>
           </nav>
           
+          {showMobileWarning && (
+            <div style={{ color: "#ff5252", fontWeight: 500, fontSize: "0.93rem", marginBottom: "0.6rem" }}>
+              Some mobile wallets may not support custom chains like Tempo.<br />
+              If wallet connect does nothing, try updating your wallet app or switch to desktop browser.
+            </div>
+          )}
+
           <ConnectButton showBalance={false} chainStatus="none" />
+
+          {/* Debugging wallet selection buttons. Remove when production ready.
+              {connectors.map((connector) => (
+                <button
+                  key={connector.id}
+                  onClick={() => handleWalletClick(connector)}
+                  disabled={!connector.ready}
+                  style={{ marginLeft: "0.5rem" }}
+                >
+                  Connect {connector.name}
+                </button>
+              ))}
+          */}
         </div>
       </header>
 
