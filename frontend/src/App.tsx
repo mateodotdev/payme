@@ -20,6 +20,7 @@ function App() {
 
   useEffect(() => {
     // Sanity check for environment variables in development/production
+    console.log("--- PAYME APP LOADED (v2.0-DEPLOYMENT-FIX) ---");
     console.log(`[system] api base url: ${import.meta.env.VITE_API_URL || '/api'}`);
   }, []);
 

@@ -28,7 +28,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if FRONTEND_BASE_URL == "*" else origins,
+    allow_origins=["*"], # Allow all origins to unblock deployment
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
