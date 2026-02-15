@@ -1,4 +1,5 @@
 import sqlite3
+import os
 import psycopg2
 import psycopg2.extras
 from contextlib import contextmanager
@@ -30,60 +31,71 @@ def get_placeholder():
 
 
 def init_db():
-    with get_db() as conn:
-        cursor = conn.cursor()
-        p = get_placeholder()
-        
-        # Note: SQLite uses 'id TEXT PRIMARY KEY', Postgres uses same.
-        # But for 'IF NOT EXISTS' we use cursor.execute
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS invoices (
-                id TEXT PRIMARY KEY,
-                merchant_address TEXT NOT NULL,
-                customer_email TEXT DEFAULT '',
-                amount TEXT NOT NULL,
-                token_address TEXT NOT NULL,
-                memo TEXT NOT NULL,
-                status TEXT DEFAULT 'PENDING',
-                created_at TEXT NOT NULL,
-                paid_at TEXT,
-                expires_at TEXT,
-                payment_link TEXT,
-                tempo_tx_hash TEXT DEFAULT '',
-                payer_address TEXT DEFAULT '',
-                tempo_chain_id TEXT,
-                tempo_rpc TEXT,
-                stablecoin_name TEXT DEFAULT 'USD Stablecoin',
-                fee_sponsored TEXT DEFAULT 'false'
-            )
-        """)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS contacts (
-                id TEXT PRIMARY KEY,
-                owner_wallet TEXT NOT NULL,
-                name TEXT NOT NULL,
-                wallet_address TEXT NOT NULL,
-                email TEXT DEFAULT '',
-                phone TEXT DEFAULT ''
-            )
-        """)
-        conn.commit()
+    if not DATABASE_URL:
+        # Check if we are in a production/serverless environment like Vercel
+        # Vercel's filesystem is read-only except for /tmp
+        if os.getenv("VERCEL") or os.getenv("NOW_REGION"):
+            print("WARNING: DATABASE_URL not set in production. Skipping SQLite initialization as filesystem is read-only.")
+            return
 
-        # ── migrations for existing databases ──
-        migrations = [
-            "ALTER TABLE contacts ADD COLUMN phone TEXT DEFAULT ''",
-            "ALTER TABLE invoices ADD COLUMN fee_sponsored TEXT DEFAULT 'false'",
-        ]
-        for sql in migrations:
-            try:
-                cursor.execute(sql)
-                conn.commit()
-            except Exception:
-                # Column already exists — ignore
-                if DATABASE_URL:
-                    conn.rollback()
+    try:
+        with get_db() as conn:
+            cursor = conn.cursor()
+            p = get_placeholder()
+            
+            # Note: SQLite uses 'id TEXT PRIMARY KEY', Postgres uses same.
+            cursor.execute(f"""
+                CREATE TABLE IF NOT EXISTS invoices (
+                    id TEXT PRIMARY KEY,
+                    merchant_address TEXT NOT NULL,
+                    customer_email TEXT DEFAULT '',
+                    amount TEXT NOT NULL,
+                    token_address TEXT NOT NULL,
+                    memo TEXT NOT NULL,
+                    status TEXT DEFAULT 'PENDING',
+                    created_at TEXT NOT NULL,
+                    paid_at TEXT,
+                    expires_at TEXT,
+                    payment_link TEXT,
+                    tempo_tx_hash TEXT DEFAULT '',
+                    payer_address TEXT DEFAULT '',
+                    tempo_chain_id TEXT,
+                    tempo_rpc TEXT,
+                    stablecoin_name TEXT DEFAULT 'USD Stablecoin',
+                    fee_sponsored TEXT DEFAULT 'false'
+                )
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS contacts (
+                    id TEXT PRIMARY KEY,
+                    owner_wallet TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    wallet_address TEXT NOT NULL,
+                    email TEXT DEFAULT '',
+                    phone TEXT DEFAULT ''
+                )
+            """)
+            conn.commit()
 
-    print("database initialized")
+            # ── migrations for existing databases ──
+            migrations = [
+                "ALTER TABLE contacts ADD COLUMN phone TEXT DEFAULT ''",
+                "ALTER TABLE invoices ADD COLUMN fee_sponsored TEXT DEFAULT 'false'",
+            ]
+            for sql in migrations:
+                try:
+                    cursor.execute(sql)
+                    conn.commit()
+                except Exception:
+                    # Column already exists — ignore
+                    if DATABASE_URL:
+                        conn.rollback()
+
+        print("database initialized")
+    except Exception as e:
+        print(f"Error initializing database: {e}")
+        if not DATABASE_URL:
+            print("This is likely because the filesystem is read-only and no DATABASE_URL (Postgres) is provided.")
 
 
 def row_to_dict(row) -> dict:
