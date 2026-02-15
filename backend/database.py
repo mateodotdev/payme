@@ -10,12 +10,15 @@ from config import DB_PATH, DATABASE_URL
 def get_db():
     if DATABASE_URL:
         # PostgreSQL (Supabase)
-        conn = psycopg2.connect(DATABASE_URL)
         try:
-            # Use RealDictCursor to get results as dicts
+            conn = psycopg2.connect(DATABASE_URL, connect_timeout=10)
             yield conn
+        except Exception as e:
+            print(f"ERROR: Could not connect to PostgreSQL: {e}")
+            raise
         finally:
-            conn.close()
+            if 'conn' in locals():
+                conn.close()
     else:
         # SQLite (Local)
         conn = sqlite3.connect(DB_PATH)

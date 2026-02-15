@@ -53,7 +53,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 # We verify the caller owns the resource they're modifying.
 
 PROTECTED_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
-PUBLIC_PATHS = {"/api/health", "/api/invoices"}  # GET invoices is public
+PUBLIC_PATHS = {"/health", "/invoices"}  # GET invoices is public
 
 class WalletAuthMiddleware(BaseHTTPMiddleware):
     """

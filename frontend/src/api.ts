@@ -35,3 +35,14 @@ export function authAxios(walletAddress: string | undefined) {
   }
   return instance;
 }
+
+/**
+ * Helper to get a clean error message from axios
+ */
+export function getErrorMessage(err: any): string {
+  if (err.response?.data?.detail) {
+    if (typeof err.response.data.detail === 'string') return err.response.data.detail;
+    if (Array.isArray(err.response.data.detail)) return err.response.data.detail[0]?.msg || 'validation error';
+  }
+  return err.message || 'unknown error';
+}

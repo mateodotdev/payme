@@ -9,7 +9,7 @@ from models import CreateInvoiceRequest, MarkPaidRequest, CreateContactRequest
 from middleware import is_valid_address
 import psycopg2.extras
 
-router = APIRouter(prefix="/api")
+router = APIRouter()
 
 
 def get_cursor(conn):

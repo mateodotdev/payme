@@ -3,7 +3,7 @@ import { FileText, Clock, ChevronRight, Trash2, Search } from 'lucide-react';
 
 import { useAccount } from 'wagmi';
 import { toast } from 'react-hot-toast';
-import { authAxios, baseApi } from '../api';
+import { authAxios, baseApi, getErrorMessage } from '../api';
 
 interface Invoice {
   id: string;
@@ -45,7 +45,7 @@ const InvoiceHistory: React.FC<InvoiceHistoryProps> = ({ onSelect }) => {
       toast.success("record removed from history");
     } catch (err) {
       console.error(err);
-      toast.error("failed to delete invoice");
+      toast.error(`failed to delete: ${getErrorMessage(err)}`);
     }
   };
 
@@ -80,7 +80,7 @@ const InvoiceHistory: React.FC<InvoiceHistoryProps> = ({ onSelect }) => {
           {filteredInvoices.map((inv) => (
             <div 
               key={inv.id} 
-              className="glass-card" 
+              className="glass-card item-activity" 
               style={{ 
                 padding: '1rem', 
                 display: 'flex', 

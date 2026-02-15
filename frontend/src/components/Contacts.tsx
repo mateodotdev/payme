@@ -3,7 +3,7 @@ import { User, Plus, Trash2, Send, Search, Mail, Phone } from 'lucide-react';
 import { useAccount } from 'wagmi';
 
 import { toast } from 'react-hot-toast';
-import { isValidAddress, authAxios, baseApi } from '../api';
+import { isValidAddress, authAxios, baseApi, getErrorMessage } from '../api';
 
 interface Contact {
   id: string;
@@ -62,7 +62,7 @@ export default function Contacts({ onSelect }: { onSelect?: (contact: Contact) =
       toast.success("contact saved!");
     } catch (err) {
       console.error(err);
-      toast.error('failed to save contact');
+      toast.error(`failed to save contact: ${getErrorMessage(err)}`);
     }
   };
 
@@ -74,7 +74,7 @@ export default function Contacts({ onSelect }: { onSelect?: (contact: Contact) =
       toast.success("contact removed");
     } catch (err) {
       console.error(err);
-      toast.error("failed to delete contact");
+      toast.error(`failed to delete contact: ${getErrorMessage(err)}`);
     }
   };
 

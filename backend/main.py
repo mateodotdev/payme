@@ -11,7 +11,10 @@ from middleware import RateLimitMiddleware, WalletAuthMiddleware
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # initialize database on startup
-    init_db()
+    try:
+        init_db()
+    except Exception as e:
+        print(f"CRITICAL: Failed to initialize database: {e}")
     yield
 
 app = FastAPI(title="payme", version="1.0.0", lifespan=lifespan)
@@ -38,6 +41,15 @@ app.add_middleware(RateLimitMiddleware, max_requests=60, window_seconds=60)
 app.add_middleware(WalletAuthMiddleware)
 
 app.include_router(router)
+
+
+@app.get("/")
+def root():
+    return {
+        "status": "running",
+        "service": "payme-backend",
+        "message": "connect to /health for status"
+    }
 
 
 @app.get("/health")
