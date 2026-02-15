@@ -1,11 +1,12 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-// Polyfills for Wagmi/Viem/WalletConnect in Vite environment
-if (typeof window !== 'undefined') {
-  (window as any).global = window;
-  (window as any).process = { env: {} };
-}
+// If needed for legacy support only; remove if not required.
+// Uncomment only if wagmi/viem/WalletConnect raise errors in Vite:
+// if (typeof window !== 'undefined') {
+//   (window as any).global = window;
+//   (window as any).process = { env: {} };
+// }
 
 import { RainbowKitProvider, getDefaultConfig, darkTheme } from "@rainbow-me/rainbowkit";
 import { WagmiProvider, http } from "wagmi";
@@ -36,13 +37,11 @@ const config = getDefaultConfig({
   transports: {
     [tempoChain.id]: http(),
   },
-  ssr: true,
+  ssr: false, // ← disables SSR which improves modal stability on mobile
 });
 
-// No AppKit config needed here
-
 const queryClient = new QueryClient();
-console.log("--- MAIN.tsx LOADED (v2.2-RAINBOW-REVERT) ---");
+console.log("--- MAIN.tsx LOADED (v2.2-RAINBOW-REVERT, ssr:false) ---");
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -52,8 +51,8 @@ createRoot(document.getElementById("root")!).render(
           theme={darkTheme({
             accentColor: '#0052ff',
             accentColorForeground: 'white',
-            borderRadius: 'medium', // Matches 16px radius
-          overlayBlur: 'small',
+            borderRadius: 'medium',
+            overlayBlur: 'small',
           })}
         >
           <App />
