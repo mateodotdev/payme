@@ -1,16 +1,19 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { WagmiProvider, http } from "wagmi";
+import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
-import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import "@rainbow-me/rainbowkit/styles.css";
+import { createAppKit } from '@reown/appkit/react';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { mainnet, arbitrum } from '@reown/appkit/networks';
 import "./index.css";
 import App from "./App.tsx";
 
-// Define the Tempo chain
+// 1. Get projectId from https://cloud.reown.com
+const projectId = '13341d916db3579c966fe7d6852649be';
+
 const tempoChain = {
   id: 42431,
+  chainNamespace: 'eip155',
   name: "Tempo Testnet",
   nativeCurrency: { name: "pathUSD", symbol: "pathUSD", decimals: 18 },
   rpcUrls: {
@@ -21,32 +24,39 @@ const tempoChain = {
   },
 } as const;
 
-const config = getDefaultConfig({
-  appName: "payme",
-  projectId: "13341d916db3579c966fe7d6852649be",
-  chains: [tempoChain],
-  ssr: true, // If using Next.js/SSR, but good to have for consistency
-  transports: {
-    [tempoChain.id]: http("https://rpc.moderato.tempo.xyz"),
+const networks = [tempoChain, mainnet, arbitrum] as any;
+
+// 3. Create Wagmi Adapter
+const wagmiAdapter = new WagmiAdapter({
+  projectId,
+  networks
+});
+
+// 4. Create AppKit
+createAppKit({
+  adapters: [wagmiAdapter],
+  networks,
+  projectId,
+  metadata: {
+    name: 'payme',
+    description: 'send money on tempo',
+    url: 'https://payme-tempo.vercel.app', // origin must match your domain & subdomain
+    icons: ['https://payme-tempo.vercel.app/logo.svg']
   },
+  themeMode: 'dark',
+  themeVariables: {
+    '--w3m-accent': '#0052ff',
+    '--w3m-border-radius-master': '1px'
+  }
 });
 
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <WagmiProvider config={config}>
+    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
-          theme={darkTheme({
-            accentColor: "#0052ff",
-            accentColorForeground: "white",
-            borderRadius: "medium",
-            fontStack: "system",
-          })}
-        >
-          <App />
-        </RainbowKitProvider>
+        <App />
       </QueryClientProvider>
     </WagmiProvider>
   </StrictMode>

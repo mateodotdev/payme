@@ -6,7 +6,6 @@ import MultiSend from './components/MultiSend';
 import BatchSend from './components/BatchSend';
 import { PlusCircle, History, Users, Send, Layers } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { Toaster } from 'react-hot-toast';
 
@@ -90,11 +89,7 @@ function App() {
             </button>
           </nav>
           
-          <ConnectButton 
-            chainStatus="icon"
-            accountStatus="address"
-            showBalance={false}
-          />
+          <appkit-button />
         </div>
       </header>
 
